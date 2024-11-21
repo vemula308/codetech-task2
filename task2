@@ -1,0 +1,173 @@
+Name:VEMULA GAYATHRI
+Company:CODTECHIT SOLUTIONS
+ID:CT12DS2434
+Domain:PYTHON PROGRAMMING
+Duration:15 SEPT to 15 NOV,2024
+
+
+
+Project Overview: Library Management System
+
+The Library Management System is a Python-based console application designed to manage library items, track checkouts and returns, and calculate fines for overdue items. The system allows users to perform basic operations such as adding new items to the library, checking out and returning items, searching for items by title or author, and viewing overdue fines. The system also ensures that items cannot be checked out if they are already borrowed and calculates fines for overdue returns.
+
+Key Features:
+
+1. Library Item Management:
+   - Each library item is represented by the LibraryItem class, which stores information about the item such as its title, author, category (e.g., Book, Magazine, DVD), and its checkout status.
+   - The class provides methods to:
+     - *Checkout an item*: Sets a due date for the item (14 days from checkout).
+     - *Return an item*: Marks the item as returned and calculates any fines for overdue returns.
+     - *Check if the item is overdue*: Compares the current date with the due date to determine if the item is overdue.
+
+2. Library Operations:
+   - The Library class manages a collection of LibraryItem objects and provides methods for:
+     - *Adding new items* to the library.
+     - *Checking out items* by title, with checks to ensure the item is available.
+     - *Returning items* and calculating overdue fines if applicable.
+     - *Searching items* by title or author.
+     - *Viewing overdue fines* for items that have been returned late.
+
+3. Overdue Fines:
+   - The system calculates fines for overdue items at a rate of $1.00 per day. If an item is returned late, the fine is added to a dictionary of fines.
+   
+4. Interactive User Interface:
+   - The program provides a simple command-line interface where users can:
+     - Add items to the library.
+     - Checkout and return items.
+     - Search for items by title or author.
+     - View any overdue fines.
+   - Users interact with the system through menu options and are prompted to input relevant data.
+Technologies Used:
+- Programming Language: Python
+- Modules: The datetime module is used to manage due dates and calculate overdue fines.
+
+
+
+CODE:
+from datetime import datetime, timedelta
+
+class LibraryItem:
+    def _init_(self, title, author, category):
+        self.title = title
+        self.author = author
+        self.category = category
+        self.checked_out = False
+        self.due_date = None
+
+    def checkout(self):
+        if not self.checked_out:
+            self.checked_out = True
+            self.due_date = datetime.now() + timedelta(days=14)  # Set due date for 2 weeks
+            return True
+        return False
+
+    def return_item(self):
+        if self.checked_out:
+            self.checked_out = False
+            self.due_date = None
+            return True
+        return False
+
+    def is_overdue(self):
+        return self.checked_out and datetime.now() > self.due_date
+
+class Library:
+    def _init_(self):
+        self.items = []  # List to hold library items
+        self.fines = {}  # Dictionary to hold fines for overdue items
+
+    def add_item(self, item):
+        self.items.append(item)
+        print(f"Added '{item.title}' to the library.")
+
+    def checkout_item(self, title):
+        for item in self.items:
+            if item.title == title:
+                if item.checkout():
+                    print(f"Checked out '{title}'. Due date: {item.due_date.strftime('%Y-%m-%d')}")
+                    return
+                else:
+                    print(f"'{title}' is already checked out.")
+                    return
+        print(f"Item '{title}' not found.")
+
+    def return_item(self, title):
+        for item in self.items:
+            if item.title == title:
+                if item.return_item():
+                    if item.is_overdue():
+                        days_overdue = (datetime.now() - item.due_date).days
+                        fine = days_overdue * 1.0  # Assume a fine of $1.00 per day
+                        self.fines[title] = fine
+                        print(f"Returned '{title}'. Overdue fine: ${fine:.2f}.")
+                    else:
+                        print(f"Returned '{title}' successfully.")
+                    return
+                else:
+                    print(f"'{title}' was not checked out.")
+                    return
+        print(f"Item '{title}' not found.")
+
+    def search_items(self, query):
+        results = [item for item in self.items if query.lower() in item.title.lower() or query.lower() in item.author.lower()]
+        if results:
+            print("Search results:")
+            for item in results:
+                status = "Checked Out" if item.checked_out else "Available"
+                print(f"- {item.title} by {item.author} [{item.category}] - {status}")
+        else:
+            print("No items found.")
+
+    def view_fines(self):
+        if self.fines:
+            print("Overdue fines:")
+            for title, fine in self.fines.items():
+                print(f"- '{title}': ${fine:.2f}")
+        else:
+            print("No overdue fines.")
+
+def main():
+    library = Library()
+
+    while True:
+        print("\nLibrary Management System")
+        print("1. Add Item")
+        print("2. Checkout Item")
+        print("3. Return Item")
+        print("4. Search Items")
+        print("5. View Overdue Fines")
+        print("6. Exit")
+
+        choice = input("Select an option (1-6): ")
+
+        if choice == '1':
+            title = input("Enter item title: ")
+            author = input("Enter item author: ")
+            category = input("Enter item category (Book/Magazine/DVD): ")
+            item = LibraryItem(title, author, category)
+            library.add_item(item)
+
+        elif choice == '2':
+            title = input("Enter item title to checkout: ")
+            library.checkout_item(title)
+
+        elif choice == '3':
+            title = input("Enter item title to return: ")
+            library.return_item(title)
+
+        elif choice == '4':
+            query = input("Enter title or author to search: ")
+            library.search_items(query)
+
+        elif choice == '5':
+            library.view_fines()
+
+        elif choice == '6':
+            print("Exiting the program.")
+            break
+
+        else:
+            print("Invalid choice. Please select a valid option.")
+
+if _name_ == "_main_":
+    main()
